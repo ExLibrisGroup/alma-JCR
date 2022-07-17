@@ -1,0 +1,17 @@
+{
+   "id": "jcr",
+   "title": "JCR",
+   "subtitle": "Jurnal citation indicator cloud app",
+   "author": "avichaib",
+   "contentSecurity": {
+      "sandbox": {
+         "modals": true
+      },
+      "connectSrc": [
+         "http://*.corp.exlibrisgroup.com:1801",
+         "https://*.alma.exlibrisgroup.com",
+         "https://*.clarivate.com"
+      ]
+   },
+   "description": ""
+}

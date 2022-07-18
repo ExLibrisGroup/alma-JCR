@@ -1,0 +1,36 @@
+<div class="title">
+    <h1>{{index}}. &nbsp;&nbsp; {{record.title}} ({{record.ID}})</h1>
+</div>
+<mat-expansion-panel *ngIf="record.available" [expanded]="false">
+    <!-- what happen if the panel opened/ closed:
+        (opened)="panelOpenState()" (closed)="panelCloseState()" 
+        -->
+    <mat-expansion-panel-header>
+        <mat-panel-title>
+            <mat-icon>done_outline</mat-icon>
+            <h2> Available</h2>
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+    
+    <h1> I'm FREEEEE (*\ _ /*) </h1>
+
+    <div class="jci-header">
+        <div class="jci-title"> Journal Citation Indicator </div>
+        <div class="jci-year"> {{record.year}} </div>
+        <div class="jci-number"> {{record.jci}} </div>
+    </div>
+    
+    <div class="table">
+        <div class="row table-header">
+            <div class="col-1"> JCR Catergory </div>
+            <div class="col-2"> Rank </div>
+            <div class="col-2"> Quartile </div>
+        </div>
+        <div class="row category-data" *ngFor="let data of record.categoryDataArray">
+            <div class="col-1"> {{ data.category }} </div>
+            <div class="col-2"> {{ data.rank }} </div>
+            <div class="col-3"> {{ data.quartile }} </div>
+        </div>
+    </div>
+  </mat-expansion-panel>
+

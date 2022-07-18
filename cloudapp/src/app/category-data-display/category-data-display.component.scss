@@ -1,0 +1,9 @@
+.row {
+    display: grid;
+    grid-template-columns: 50% 25% 25%;
+}
+
+.table-header {
+    background-color: whitesmoke;
+    font-weight: bold;
+}

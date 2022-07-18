@@ -15,7 +15,6 @@ import {JwtPayload} from "jwt-decode";
 
 export class ClarivateApiService {
 
-    bibRecord: AlmaBibRecord;
     baseURL = "https://api.clarivate.com/apis/wos-journals/v1";
     _authToken = "5b8136cb7c1d1302d82b4f8f37510c4322982667"
     private _initData: InitData;
@@ -150,13 +149,4 @@ export class ClarivateApiService {
         }
         return this._url;
     }
-
-
-
-  }
-
-  export class AlmaBibRecord { //TODO : bib only?
-    mmsId: string;
-    description: string;
-    issn: string;
 }

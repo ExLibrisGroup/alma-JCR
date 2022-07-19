@@ -1,6 +1,32 @@
+.jci-header {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 35px 20px;
+    grid-template-areas:
+        "header header"
+        "title-1 title-2"
+        "content-1 content-2";
+
+    margin-bottom: 30px;
+    font-size: larger;
+    
+    .jci-title {
+        grid-area: header;
+        font-weight: bold;
+    }
+    .jci-year {
+        grid-area: title-1;
+    }
+    .jci-number {
+        grid-area: content-1;
+        font-weight: bolder;
+    }
+}
+
 .row {
     display: grid;
     grid-template-columns: 50% 25% 25%;
+    padding: 5px;
 }
 
 .table-header {

@@ -87,16 +87,19 @@ export class MainComponent implements OnInit, OnDestroy {
         return of(jciRecord);
       }),
       mergeMap(response => {
-        if(!this.isEmpty(response)){ // && response.status === OKstatus) {
+        if(!this.isEmpty(response) && response.status === OKstatus) {
           jciRecord.available = true;
-          jciRecord.year = response.year;
-          jciRecord.jci = response.metrics.impactMetrics.jci;
-          jciRecord.categoryDataArray = response.ranks.jif;
+          jciRecord.year = response.jcrInfo.year;
+          jciRecord.jci = response.jcrInfo.metrics.impactMetrics.jci;
+          jciRecord.categoryDataArray = response.jcrInfo.ranks.jif;
+        } else {
+          console.log("There was a problem in the response from the Clarivate servers: \n" 
+          + response.errorMessage);
         }
         return of(jciRecord);
       }),
       catchError(()=>{
-        console.log("error will getting the information from Clarivate");
+        console.log("An error occurs while trying to connect to the Clarivate servers");
         jciRecord.available = false;
         return of(jciRecord);
       })

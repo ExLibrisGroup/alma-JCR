@@ -15,4 +15,12 @@ export class CategoryDataDisplayComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  IdentefierDisplay() {
+    if(this.record.ID !== undefined && this.record.ID !== null && this.record.ID !== "") {
+      return "(" + this.record.ID + ")";
+    } else {
+      return "";
+    }
+  }
+
 }

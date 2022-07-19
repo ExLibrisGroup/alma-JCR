@@ -1,8 +1,8 @@
 import { Observable, of, Subscription, forkJoin  } from 'rxjs';
 import { finalize, tap, mergeMap, catchError } from 'rxjs/operators';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { CloudAppRestService, CloudAppEventsService, HttpMethod,  EntityType,
-  Entity, RestErrorResponse, AlertService } from '@exlibris/exl-cloudapp-angular-lib';
+  Entity, AlertService } from '@exlibris/exl-cloudapp-angular-lib';
 import { MatRadioChange } from '@angular/material/radio';
 import { AlmaApiService, AlmaBibRecord } from '../service/alma.api.service';
 import { ClarivateApiService } from '../service/clarivate.api.service';
@@ -16,12 +16,21 @@ import { JCIRecord, OKstatus } from '../category-data-display/category-data-util
 })
 export class MainComponent implements OnInit, OnDestroy {
 
+  // Templates
+  @ViewChild('notSearched') notSearchedTmpl:TemplateRef<any>;
+  @ViewChild('searchResults') searchResultsTmpl:TemplateRef<any>;
+  @ViewChild('noResults') noResultsTmpl:TemplateRef<any>;
+  public currentResulsTmpl: TemplateRef<any>;
+
+
   private pageLoad$: Subscription;
 
-  loading = false;
+  loading = true;//false;
   selectedEntity: Entity;
   apiResult: any;
   private _url: string;
+  private baseUrl : string = "https://jcr.clarivate.com/jcr-jp/journal-profile?journal=";
+  private yearParam : string = " &year=";
 
   records = new Array<JCIRecord>();
 
@@ -40,17 +49,29 @@ export class MainComponent implements OnInit, OnDestroy {
     this.pageLoad$ = this.eventsService.onPageLoad( pageInfo => {
       const entities = (pageInfo.entities||[]);
       if (entities.length > 0) {
-        this.loading = true;
+        
         this.getAllPageRecords(entities);
       }
       this.loading = false;
     });  
+    this.resultsTemplateFactory();
 
 
     
   }
 
+  resultsTemplateFactory() {
+    if(this.records.length > 0){
+        this.currentResulsTmpl = this.searchResultsTmpl;
+    } else if(this.records.length == 0 || this.records.length == null) {
+        this.currentResulsTmpl = this.noResultsTmpl;
+    } else {
+        this.currentResulsTmpl = this.notSearchedTmpl;
+    }
+}
+
   getAllPageRecords(entities: any[]) {
+    this.loading = true;
     // forkJoin run the function inside on each entity seperatly
     // the map function make the entity order to be saved during the running 
     forkJoin(entities.map(entity => this.getRecord(entity)))
@@ -60,16 +81,15 @@ export class MainComponent implements OnInit, OnDestroy {
           },
           error: (e) => {
             console.log(e);
-            // this.records.push(jciRecord);
           },
-          complete: () => {}
+          complete: () => {
+            this.resultsTemplateFactory();
+          }
         });
     }
 
   getRecord(entity): Observable<JCIRecord> {
     let jciRecord = new JCIRecord();
-    
-    // return this.clarivateServise.getSearchResultsFromClarivateTest().pipe(
     return this.almaService.getBibDetailsByMmsId(entity.id).pipe(
       mergeMap(responseRecord => {
         jciRecord.title = responseRecord.title;
@@ -91,7 +111,8 @@ export class MainComponent implements OnInit, OnDestroy {
           jciRecord.available = true;
           jciRecord.year = response.jcrInfo.year;
           jciRecord.jci = response.jcrInfo.metrics.impactMetrics.jci;
-          jciRecord.categoryDataArray = response.jcrInfo.ranks.jif;
+          jciRecord.jurnalURL = this.generateJurnalURL(response.jurnalType, jciRecord.year);
+          jciRecord.categoryDataArray = response.jcrInfo.ranks.jci;
         } else {
           console.log("There was a problem in the response from the Clarivate servers: \n" 
           + response.errorMessage);
@@ -114,38 +135,6 @@ export class MainComponent implements OnInit, OnDestroy {
     } 
   }
 
-
-
-//   getBibs(entities: any[]) {
-//     let bibs: any[] = [];
-//     entities.forEach(bib => {
-//       let almaBib : AlmaBibRecord = new AlmaBibRecord();
-//         this.almaService.getBibDetailsByMmsId(bib.id).pipe(
-//             mergeMap(b => {      
-//                 almaBib.mmsId = b.mms_id;
-//                 almaBib.issn = b.issn;
-//                 almaBib.description = b.title;
-//                 return of(almaBib);
-//               }),
-//               catchError(()=>{
-//                 console.log("error");
-//                 return of(almaBib);
-//               }),
-//               mergeMap(almaBib => {
-//                   if(almaBib.issn !== null && almaBib.issn !== undefined) {
-//                     return of(this.clarivateServise.getJCIInformation(almaBib.issn));
-//                   }
-//                   return of();
-//               })
-//         ).subscribe({
-//             next : (almaBib) => {
-//                 bibs.push(almaBib);
-//             }
-//         })
-//     })
-//     return bibs;
-// }
-
   ngOnDestroy(): void {
     this.pageLoad$.unsubscribe();
   }
@@ -166,63 +155,12 @@ export class MainComponent implements OnInit, OnDestroy {
     this.selectedEntity = null;
   }
 
+  generateJurnalURL(jurnalType: string, year : number) : string {
+    if(this.isEmpty(jurnalType)) {
+      console.log("");
+      return "";
+    }
+    return this.baseUrl + jurnalType + this.yearParam + year;
 
-    // getBibs(entities: any[]) {
-    //   entities.forEach(bib => {
-    //       this.almaService.getBibDetailsByMmsId(bib.id).pipe(
-    //         mergeMap(b => {
-    //           let almaBib : AlmaBibRecord = new AlmaBibRecord();
-    //           almaBib.mmsId = b.mms_id;
-    //           almaBib.issn = b.issn;
-    //           almaBib.description = b.title;
-    //           return of(almaBib);
-    //         }),
-    //         catchError(()=>{
-    //           console.log("error");
-    //           return of();
-    //         })).subscribe({
-    //           next : (almaBib) => {
-    //             this.almaBibs.push(almaBib);
-    //           }
-    //         })
-    //     })
-    // }
-
-  // getBibs() {
-  //   this.entities$.pipe(
-  //     mergeMap(entities => { 
-  //       entities.forEach(bib => {
-  //         this.almaService.getBibDetailsByMmsId(bib.id).pipe(
-  //           mergeMap(b => {
-  //             let almaBib : AlmaBibRecord = new AlmaBibRecord();
-  //             almaBib.mmsId = b.mms_id;
-  //             almaBib.issn = b.issn;
-  //             almaBib.description = b.title;
-  //             return of(almaBib);
-  //           }),
-  //           catchError(()=>{
-  //             console.log("error");
-  //             return of();
-  //           })).subscribe({
-  //             next : (almaBib) => {
-  //               this.almaBibs.push(almaBib);
-  //             }
-  //           })
-  //       })
-  //       return of(this.bibs)
-  //     }),
-  //     catchError(()=>{
-  //       console.log("error");
-  //       return of();
-  //     })
-  //   ).subscribe({
-  //     next: () => {
-  //       return this.bibs;
-  //     } 
-  //   })
-    
-    
-  //  return this.bibs;
-    
-  // }
+  }
 }

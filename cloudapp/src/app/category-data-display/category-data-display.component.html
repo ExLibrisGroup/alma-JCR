@@ -4,7 +4,8 @@
 <mat-expansion-panel *ngIf="record.available" [expanded]="false">
     <mat-expansion-panel-header>
         <mat-panel-title>
-            <mat-icon>done_outline</mat-icon>
+            <!-- <mat-icon>done_outline</mat-icon> -->
+            <mat-icon class="green">check</mat-icon>
             <h2> Available</h2>
         </mat-panel-title>
     </mat-expansion-panel-header>
@@ -15,7 +16,7 @@
     </div>
     <div class="table">
         <div class="row table-header">
-            <div class="col-1"> JCR Catergory </div>
+            <div class="col-1"> JCR Catergory  </div>
             <div class="col-2"> Rank </div>
             <div class="col-2"> Quartile </div>
         </div>
@@ -25,4 +26,5 @@
             <div class="col-3"> {{ data.quartile }} </div>
         </div>
     </div>
+    <a [href]="record.jurnalURL" target="_blank" translate>Main.Record</a>
 </mat-expansion-panel>

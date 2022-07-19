@@ -1,6 +1,7 @@
 export class JCIRecord {
     title: string;
     ID: string;
+    jurnalURL : string;
     available: boolean;
     year?: number;
     jci?: number;

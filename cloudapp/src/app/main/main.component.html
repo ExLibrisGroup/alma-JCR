@@ -1,49 +1,15 @@
-<ng-container *ngTemplateOutlet="currentResulsTmpl"></ng-container>
-
-<div class="loading-shade" *ngIf="loading">
-  <mat-progress-spinner mode="indeterminate" diameter="50">
-  </mat-progress-spinner>
-</div>
-
-<br><br><br>
-
-
-<ng-template #searchResults>
+<div *ngIf="records.length>0 else nobibs">
+  <p translate>Main.Intro</p>
   <mat-list>
     <mat-list-item *ngFor="let record of records; index as i">
       <category-data-display [record]="record" [index]="i + 1"></category-data-display>
     </mat-list-item>
   </mat-list>
-</ng-template>
-
-
-<ng-template #noResults>
-  <p translate>Main.NoRecords</p>
-  <br><br><br>
-</ng-template>
-
-
-<ng-template #notSearched>
-  <div class="notSearched"></div>
-</ng-template>
-
-
-
-
-
-<!-- <div *ngIf="records.length>0 else nobibs">
-  <p translate>Main.Intro</p>
-  <mat-list>
-    <mat-list-item *ngFor="let record of records; index as i">
-      <category-data-display [record]="record" [index]="i"></category-data-display>
-    </mat-list-item>
-  </mat-list>
 </div>
 <ng-template #nobibs>      
-  <p translate>Main.NoRecords</p>
 </ng-template>
 <div class="loading-shade" *ngIf="loading">
   <mat-progress-spinner mode="indeterminate" diameter="50">
   </mat-progress-spinner>
-</div> -->
+</div>
 

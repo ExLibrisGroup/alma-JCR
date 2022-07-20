@@ -16,16 +16,9 @@ import { JCIRecord, OKstatus } from '../category-data-display/category-data-util
 })
 export class MainComponent implements OnInit, OnDestroy {
 
-  // Templates
-  @ViewChild('notSearched') notSearchedTmpl:TemplateRef<any>;
-  @ViewChild('searchResults') searchResultsTmpl:TemplateRef<any>;
-  @ViewChild('noResults') noResultsTmpl:TemplateRef<any>;
-  public currentResulsTmpl: TemplateRef<any>;
-
-
   private pageLoad$: Subscription;
 
-  loading = true;//false;
+  loading = false;
   selectedEntity: Entity;
   apiResult: any;
   private _url: string;
@@ -49,32 +42,33 @@ export class MainComponent implements OnInit, OnDestroy {
     this.pageLoad$ = this.eventsService.onPageLoad( pageInfo => {
       const entities = (pageInfo.entities||[]);
       if (entities.length > 0) {
-        
-        this.getAllPageRecords(entities);
+       this.getAllPageRecords(entities);
       }
-      this.loading = false;
     });  
-    this.resultsTemplateFactory();
-
-
-    
   }
 
-  resultsTemplateFactory() {
-    if(this.records.length > 0){
-        this.currentResulsTmpl = this.searchResultsTmpl;
-    } else if(this.records.length == 0 || this.records.length == null) {
-        this.currentResulsTmpl = this.noResultsTmpl;
-    } else {
-        this.currentResulsTmpl = this.notSearchedTmpl;
-    }
-}
+  setLoadingRecords(records) {
+        let bibs = new Array<JCIRecord>();
+        records.forEach(element => {
+          let jci = new JCIRecord();
+          jci.title = element.description
+          bibs.push(jci)
+        });
+        this.records = bibs;
+  }
 
   getAllPageRecords(entities: any[]) {
     this.loading = true;
     // forkJoin run the function inside on each entity seperatly
     // the map function make the entity order to be saved during the running 
-    forkJoin(entities.map(entity => this.getRecord(entity)))
+    const mmsIds = entities.map(entity => entity.id);
+    return this.almaService.getBibDetailsByMmsId(entities.map(entity => entity.id)).pipe(
+      mergeMap(records => {
+        this.setLoadingRecords(records);
+        return of();
+      }),
+     
+    )
     .subscribe({
       next: (records: any[]) => {
             this.records = records;
@@ -83,10 +77,27 @@ export class MainComponent implements OnInit, OnDestroy {
             console.log(e);
           },
           complete: () => {
-            this.resultsTemplateFactory();
+            this.loading = false;
           }
         });
+    
     }
+
+    
+    // forkJoin(entities.map(entity => this.getRecord(entity)))
+    // .subscribe({
+    //   next: (records: any[]) => {
+    //         this.records = records;
+    //       },
+    //       error: (e) => {
+    //         console.log(e);
+    //       },
+    //       complete: () => {
+    //         this.loading = false;
+    //         this.resultsTemplateFactory();
+    //       }
+    //     });
+    // }
 
   getRecord(entity): Observable<JCIRecord> {
     let jciRecord = new JCIRecord();

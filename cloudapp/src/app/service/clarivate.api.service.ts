@@ -39,18 +39,6 @@ export class ClarivateApiService {
         let url : string = this.baseURL + "/journals?q=";
         url += issn;
 
-
-        // return this.getAuthToken().pipe(
-           
-        //     mergeMap(authToken => {
-        //         let headers = this.setAuthHeader(authToken);
-        //         return this.http.get<any>(url, { headers })
-        //     }),
-        //     mergeMap(response => {
-        //         return of(response);
-        //     })
-        // );
-       
         return this.http.get<any>(url, {headers :{'X-ApiKey': '5b8136cb7c1d1302d82b4f8f37510c4322982667'}}).pipe(
         //return this.restService.call(url).pipe(
             mergeMap(response1 => {

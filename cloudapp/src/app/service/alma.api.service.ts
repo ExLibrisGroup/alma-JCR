@@ -18,7 +18,7 @@ export class AlmaApiService {
     private translate: TranslateService,
   ) {  }
 
-    getBibDetailsByMmsId (mmsId : string)  {
+    getBibDetailsByMmsId (mmsId)  {
         
         let url : string = "/almaws/v1/bibs/";
         url += mmsId;

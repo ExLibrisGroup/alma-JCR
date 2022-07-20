@@ -1,12 +1,11 @@
-import { Observable, of, Subscription, forkJoin  } from 'rxjs';
-import { finalize, tap, mergeMap, catchError } from 'rxjs/operators';
-import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { CloudAppRestService, CloudAppEventsService, HttpMethod,  EntityType,
-  Entity, AlertService } from '@exlibris/exl-cloudapp-angular-lib';
+import { Observable, of, Subscription } from 'rxjs';
+import { finalize, tap, mergeMap } from 'rxjs/operators';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CloudAppRestService, CloudAppEventsService, Entity, AlertService } from '@exlibris/exl-cloudapp-angular-lib';
 import { MatRadioChange } from '@angular/material/radio';
-import { AlmaApiService, AlmaBibRecord } from '../service/alma.api.service';
+import { AlmaApiService } from '../service/alma.api.service';
 import { ClarivateApiService } from '../service/clarivate.api.service';
-import { JCIRecord, OKstatus } from '../category-data-display/category-data-util';
+import { JCIRecord } from '../category-data-display/category-data-util';
 
 
 @Component({
@@ -16,26 +15,17 @@ import { JCIRecord, OKstatus } from '../category-data-display/category-data-util
 })
 export class MainComponent implements OnInit, OnDestroy {
 
-  // Templates
-  @ViewChild('notSearched') notSearchedTmpl:TemplateRef<any>;
-  @ViewChild('searchResults') searchResultsTmpl:TemplateRef<any>;
-  @ViewChild('noResults') noResultsTmpl:TemplateRef<any>;
-  public currentResulsTmpl: TemplateRef<any>;
-
-
   private pageLoad$: Subscription;
 
-  loading = true;//false;
+  loading = false;
   selectedEntity: Entity;
   apiResult: any;
-  private _url: string;
   private baseUrl : string = "https://jcr.clarivate.com/jcr-jp/journal-profile?journal=";
   private yearParam : string = " &year=";
 
-  records = new Array<JCIRecord>();
+  records = new Array<any>();
 
-  entities$: Observable<Entity[]> = this.eventsService.entities$
-  .pipe(tap(() => this.clear()))
+  entities$: Observable<Entity[]> = this.eventsService.entities$.pipe(tap(() => this.clear()))
 
   constructor(
     private almaService: AlmaApiService,
@@ -49,83 +39,57 @@ export class MainComponent implements OnInit, OnDestroy {
     this.pageLoad$ = this.eventsService.onPageLoad( pageInfo => {
       const entities = (pageInfo.entities||[]);
       if (entities.length > 0) {
-        
+        this.loading = true;
         this.getAllPageRecords(entities);
       }
-      this.loading = false;
+      //this.loading = false;
     });  
-    this.resultsTemplateFactory();
-
-
-    
   }
-
-  resultsTemplateFactory() {
-    if(this.records.length > 0){
-        this.currentResulsTmpl = this.searchResultsTmpl;
-    } else if(this.records.length == 0 || this.records.length == null) {
-        this.currentResulsTmpl = this.noResultsTmpl;
-    } else {
-        this.currentResulsTmpl = this.notSearchedTmpl;
-    }
-}
 
   getAllPageRecords(entities: any[]) {
-    this.loading = true;
-    // forkJoin run the function inside on each entity seperatly
-    // the map function make the entity order to be saved during the running 
-    forkJoin(entities.map(entity => this.getRecord(entity)))
-    .subscribe({
-      next: (records: any[]) => {
-            this.records = records;
-          },
-          error: (e) => {
-            console.log(e);
-          },
-          complete: () => {
-            this.resultsTemplateFactory();
-          }
-        });
-    }
-
-  getRecord(entity): Observable<JCIRecord> {
-    let jciRecord = new JCIRecord();
-    return this.almaService.getBibDetailsByMmsId(entity.id).pipe(
-      mergeMap(responseRecord => {
-        jciRecord.title = responseRecord.title;
-        if(!this.isEmpty(responseRecord.issn)) {
-          jciRecord.ID = responseRecord.issn;
-          return this.clarivateServise.getSearchResultsFromClarivate(responseRecord.issn);
-        } else {
-          return of(jciRecord);
-        }
-      }),
-      catchError(()=>{
-        console.log("error in getting ISSN");
-        jciRecord.available = false;
-        jciRecord.title = entity.description;
-        return of(jciRecord);
-      }),
-      mergeMap(response => {
-        if(!this.isEmpty(response) && response.status === OKstatus) {
-          jciRecord.available = true;
-          jciRecord.year = response.jcrInfo.year;
-          jciRecord.jci = response.jcrInfo.metrics.impactMetrics.jci;
-          jciRecord.jurnalURL = this.generateJurnalURL(response.jurnalType, jciRecord.year);
-          jciRecord.categoryDataArray = response.jcrInfo.ranks.jci;
-        } else {
-          console.log("There was a problem in the response from the Clarivate servers: \n" 
-          + response.errorMessage);
-        }
-        return of(jciRecord);
-      }),
-      catchError(()=>{
-        console.log("An error occurs while trying to connect to the Clarivate servers");
-        jciRecord.available = false;
-        return of(jciRecord);
+    const mmsIds = entities.map(entity => entity.id);
+    this.almaService.getBibsDetailsByMmsId(mmsIds).pipe(
+      mergeMap(records => {
+        // For the first loading.
+        // The application loads the records in two steps:
+        // The first -> load the records with the basic data (title only).
+        // The second -> load the records with all the data we retrieve from clarivate.
+        this.records = records;
+        return of(this.records);
+      }),mergeMap(records => {
+        return this.clarivateServise.getSearchResultsFromClarivate(records);
       })
-    )
+    ).subscribe({
+      next: (response) => {
+        let newrecords = new Array<JCIRecord>();
+        response.jcrEntities.forEach(record => {
+          newrecords.push(this.generateJciRecord(record));
+        });
+            this.records = newrecords;
+      },
+      error: e => {
+        this.loading = false;
+        console.log(e.message);
+      },
+      complete: () => {  
+        this.loading = false;
+      }
+    });
   }
+
+  generateJciRecord(record) : JCIRecord {
+    let jciRecord = new JCIRecord();
+    jciRecord.ID = record.issn;
+    jciRecord.title = record.title;
+    if(!this.isEmpty(record.jcrInfo)) {
+      jciRecord.available = true;
+      jciRecord.year = record.jcrInfo.year;
+      jciRecord.jci = record.jcrInfo.metrics.impactMetrics.jci;
+      jciRecord.jurnalURL = this.generateJurnalURL(record.jurnalType, jciRecord.year);
+      jciRecord.categoryDataArray = record.jcrInfo.ranks.jci;
+    }
+    return jciRecord;
+}
 
   isEmpty(obj: any) {
     if(obj === undefined || obj === null || obj === "") {
@@ -137,17 +101,6 @@ export class MainComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.pageLoad$.unsubscribe();
-  }
-
-  entitySelected(event: MatRadioChange) {
-    const value = event.value as Entity;
-    this.loading = true;
-    this.restService.call<any>(value.link)
-    .pipe(finalize(()=>this.loading=false))
-    .subscribe(
-      result => this.apiResult = result,
-      error => this.alert.error('Failed to retrieve entity: ' + error.message)
-    );
   }
 
   clear() {

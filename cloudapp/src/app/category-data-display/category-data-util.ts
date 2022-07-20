@@ -2,7 +2,7 @@ export class JCIRecord {
     title: string;
     ID: string;
     jurnalURL : string;
-    available: boolean;
+    available: boolean = false;
     year?: number;
     jci?: number;
     categoryDataArray?: CategoryData[];

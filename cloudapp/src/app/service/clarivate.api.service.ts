@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
-import { CloudAppRestService, CloudAppEventsService, InitData } from '@exlibris/exl-cloudapp-angular-lib';
-import { TranslateService } from '@ngx-translate/core';
-import { from } from 'rxjs/internal/observable/from';
-import { mergeMap, catchError, concatMap} from 'rxjs/operators';
+import { CloudAppEventsService, InitData } from '@exlibris/exl-cloudapp-angular-lib';
+import { mergeMap } from 'rxjs/operators';
 import { of } from 'rxjs/internal/observable/of';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs/internal/Observable';
 import jwt_decode from "jwt-decode";
 import {JwtPayload} from "jwt-decode";
@@ -25,68 +23,12 @@ export class ClarivateApiService {
 
 
 
-  constructor(
-    private restService: CloudAppRestService,
-    private eventsService: CloudAppEventsService,
-    private translate: TranslateService,
-    private http: HttpClient
+    constructor(
+        private eventsService: CloudAppEventsService,
+        private http: HttpClient
 
-  ) {  }
+    ) {}
 
-
-    getJCIInformation (issn : string)  {
-        
-        let url : string = this.baseURL + "/journals?q=";
-        url += issn;
-
-
-        // return this.getAuthToken().pipe(
-           
-        //     mergeMap(authToken => {
-        //         let headers = this.setAuthHeader(authToken);
-        //         return this.http.get<any>(url, { headers })
-        //     }),
-        //     mergeMap(response => {
-        //         return of(response);
-        //     })
-        // );
-       
-        return this.http.get<any>(url, {headers :{'X-ApiKey': '5b8136cb7c1d1302d82b4f8f37510c4322982667'}}).pipe(
-        //return this.restService.call(url).pipe(
-            mergeMap(response1 => {
-                if(response1.metadata.total > 0) {
-                    console.log("********** metadata.total = " + response1.metadata.total + "*******************");
-                    return this.http.get<any>(this.baseURL + response1.hits[0].self, {headers :{'X-ApiKey': '5b8136cb7c1d1302d82b4f8f37510c4322982667'}})
-                }
-                return of();
-            }),
-            catchError((err) => {
-                console.log("step 1 = " + err);
-                return of();
-            }),
-            mergeMap(response2 => {
-                if(response2.journalCitationReports[0] !== null || response2.journalCitationReports[0] !== undefined) {
-                    console.log("********** response2.journalCitationReports[0] = " + response2.journalCitationReports[0] + "*******************");
-                    return this.http.get<any>(this.baseURL + response2.journalCitationReports[0].url, {headers :{'X-ApiKey': '5b8136cb7c1d1302d82b4f8f37510c4322982667', 'Access-Control-Allow-Origin': 'http://localhost:4200', 'Access-Control-Allow-Methods': 'GET'}})
-                }
-                return of();
-            }),
-            catchError((err) => {
-                console.log("step 1 = " + err);
-                return of();
-            }),
-        ).subscribe({
-            next : (t) => {
-                console.log("next");
-                return t;
-            }
-        })
-
-       
-        
-    }
-
-    // Token-based authentication menagment
 
     isEmpty(val : any) {
         return (val === undefined || val == null || val.length <= 0) ? true : false;
@@ -111,24 +53,19 @@ export class ClarivateApiService {
         return { 'Authorization': `Bearer ${this._authToken}` };
     }
 
-    getSearchResultsFromClarivate(issn : string) {
+    getSearchResultsFromClarivate(entities: any[]) {
 
         let fullUrl: string;
+        let body = JSON.stringify(entities);
 
         return this.getInitData().pipe(
             mergeMap(initData => {
-                console.log("********** fullUrl = " + fullUrl + "*******************");
-                fullUrl = this.setBaseUrl(initData) + issn;
+                fullUrl = this.setBaseUrl(initData);
                 return this.getAuthToken()
             }),
             mergeMap(authToken => {
                 let headers = this.setAuthHeader(authToken);
-                console.log("********** headers = " + headers + "*******************");
-                return this.http.get<any>(fullUrl, { headers })
-            }),
-            mergeMap(response => {
-                console.log("********** response *******************");
-                return of(response);
+                return this.http.post<any>(fullUrl, body, { headers })
             })
         );
     }

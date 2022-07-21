@@ -3,6 +3,10 @@
    "title": "JCR",
    "subtitle": "Jurnal citation indicator cloud app",
    "author": "avichaib",
+   "icon": {
+      "type": "url",
+      "value": "/assets/clarivate_logo.png"
+   },
    "contentSecurity": {
       "sandbox": {
          "modals": true

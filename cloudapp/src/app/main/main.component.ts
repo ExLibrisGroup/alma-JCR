@@ -60,7 +60,6 @@ export class MainComponent implements OnInit, OnDestroy {
           },
           error: (e) => {
             console.log(e);
-            // this.records.push(jciRecord);
           },
           complete: () => {}
         });
@@ -69,7 +68,6 @@ export class MainComponent implements OnInit, OnDestroy {
   getRecord(entity): Observable<JCIRecord> {
     let jciRecord = new JCIRecord();
     
-    // return this.clarivateServise.getSearchResultsFromClarivateTest().pipe(
     return this.almaService.getBibDetailsByMmsId(entity.id).pipe(
       mergeMap(responseRecord => {
         jciRecord.title = responseRecord.title;
@@ -114,38 +112,6 @@ export class MainComponent implements OnInit, OnDestroy {
     } 
   }
 
-
-
-//   getBibs(entities: any[]) {
-//     let bibs: any[] = [];
-//     entities.forEach(bib => {
-//       let almaBib : AlmaBibRecord = new AlmaBibRecord();
-//         this.almaService.getBibDetailsByMmsId(bib.id).pipe(
-//             mergeMap(b => {      
-//                 almaBib.mmsId = b.mms_id;
-//                 almaBib.issn = b.issn;
-//                 almaBib.description = b.title;
-//                 return of(almaBib);
-//               }),
-//               catchError(()=>{
-//                 console.log("error");
-//                 return of(almaBib);
-//               }),
-//               mergeMap(almaBib => {
-//                   if(almaBib.issn !== null && almaBib.issn !== undefined) {
-//                     return of(this.clarivateServise.getJCIInformation(almaBib.issn));
-//                   }
-//                   return of();
-//               })
-//         ).subscribe({
-//             next : (almaBib) => {
-//                 bibs.push(almaBib);
-//             }
-//         })
-//     })
-//     return bibs;
-// }
-
   ngOnDestroy(): void {
     this.pageLoad$.unsubscribe();
   }
@@ -166,63 +132,4 @@ export class MainComponent implements OnInit, OnDestroy {
     this.selectedEntity = null;
   }
 
-
-    // getBibs(entities: any[]) {
-    //   entities.forEach(bib => {
-    //       this.almaService.getBibDetailsByMmsId(bib.id).pipe(
-    //         mergeMap(b => {
-    //           let almaBib : AlmaBibRecord = new AlmaBibRecord();
-    //           almaBib.mmsId = b.mms_id;
-    //           almaBib.issn = b.issn;
-    //           almaBib.description = b.title;
-    //           return of(almaBib);
-    //         }),
-    //         catchError(()=>{
-    //           console.log("error");
-    //           return of();
-    //         })).subscribe({
-    //           next : (almaBib) => {
-    //             this.almaBibs.push(almaBib);
-    //           }
-    //         })
-    //     })
-    // }
-
-  // getBibs() {
-  //   this.entities$.pipe(
-  //     mergeMap(entities => { 
-  //       entities.forEach(bib => {
-  //         this.almaService.getBibDetailsByMmsId(bib.id).pipe(
-  //           mergeMap(b => {
-  //             let almaBib : AlmaBibRecord = new AlmaBibRecord();
-  //             almaBib.mmsId = b.mms_id;
-  //             almaBib.issn = b.issn;
-  //             almaBib.description = b.title;
-  //             return of(almaBib);
-  //           }),
-  //           catchError(()=>{
-  //             console.log("error");
-  //             return of();
-  //           })).subscribe({
-  //             next : (almaBib) => {
-  //               this.almaBibs.push(almaBib);
-  //             }
-  //           })
-  //       })
-  //       return of(this.bibs)
-  //     }),
-  //     catchError(()=>{
-  //       console.log("error");
-  //       return of();
-  //     })
-  //   ).subscribe({
-  //     next: () => {
-  //       return this.bibs;
-  //     } 
-  //   })
-    
-    
-  //  return this.bibs;
-    
-  // }
 }

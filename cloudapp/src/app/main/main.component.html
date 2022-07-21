@@ -1,10 +1,9 @@
 <div *ngIf="records.length>0 else nobibs">
   <p translate>Main.Intro</p>
   <mat-list>
-    <mat-list-item *ngFor="let record of records; index as i">
-      <category-data-display [record]="record" [index]="i"></category-data-display>
-      <!-- <h3 matLine>{{i+1}}. {{bib.description || bib.mmsId}} {{(bib.issn)}}</h3> -->
-    </mat-list-item>
+    <div *ngFor="let record of records; index as i">
+      <category-data-display [record]="record" [index]="i+1"></category-data-display>
+    </div>
   </mat-list>
 </div>
 <ng-template #nobibs>      

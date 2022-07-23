@@ -1,11 +1,11 @@
 <div class="title">
-    <span>{{index}}. {{record.title}} {{IdentefierDisplay()}} </span>
+    <span>{{index}}. {{record.title?record.title : record.description}} {{IdentefierDisplay()}} </span>
 </div>
 <div *ngIf="record.available else notAvaliableRecord">
     <mat-expansion-panel [expanded]="false">
         <mat-expansion-panel-header>
             <mat-panel-title>
-                <mat-icon class="available-icon">done_outline</mat-icon>
+                <mat-icon class="available-icon">check</mat-icon>
                 <span style="padding-top: 4px;">Available</span>
             </mat-panel-title>
         </mat-expansion-panel-header>
@@ -17,8 +17,8 @@
         <div class="table">
             <div class="row table-header">
                 <div class="col-1"> JCR Catergory </div>
-                <div class="col-2"> Rank </div>
-                <div class="col-3"> Quartile </div>
+                <div class="col-2" matTooltip="Rank of a JCR category by the number of journals" matTooltipPosition="above"> Rank </div>
+                <div class="col-3" > Quartile </div>
             </div>
             <div class="row category-data" *ngFor="let data of record.categoryDataArray">
                 <div class="col-1"> {{ data.category }} </div>
@@ -26,12 +26,12 @@
                 <div class="col-3"> {{ data.quartile }} </div>
             </div>
         </div>
+        <a [href]="record.jurnalURL" target="_blank" translate>Source : Journal Citation Reports™ {{record.year}}</a>
     </mat-expansion-panel>
 </div>
 
 <ng-template #notAvaliableRecord>
-    <div class="not-avaliable">
+    <div class="not-avaliable" *ngIf="record.ID">
         <span>No measure found.</span>
     </div>
-    <a [href]="record.jurnalURL" target="_blank" translate>Source : Journal Citation Reports™ {{record.year}}</a>
-</mat-expansion-panel>
+</ng-template>

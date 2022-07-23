@@ -1,8 +1,7 @@
-import { Observable, of, Subscription } from 'rxjs';
-import { finalize, tap, mergeMap } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { tap, mergeMap } from 'rxjs/operators';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CloudAppRestService, CloudAppEventsService, Entity, AlertService } from '@exlibris/exl-cloudapp-angular-lib';
-import { MatRadioChange } from '@angular/material/radio';
 import { AlmaApiService } from '../service/alma.api.service';
 import { ClarivateApiService } from '../service/clarivate.api.service';
 import { JCIRecord } from '../category-data-display/category-data-util';
@@ -22,6 +21,8 @@ export class MainComponent implements OnInit, OnDestroy {
   apiResult: any;
   private baseUrl : string = "https://jcr.clarivate.com/jcr-jp/journal-profile?journal=";
   private yearParam : string = " &year=";
+  private OkStatus: string = 'OK';
+
 
   records = new Array<any>();
 
@@ -39,10 +40,14 @@ export class MainComponent implements OnInit, OnDestroy {
     this.pageLoad$ = this.eventsService.onPageLoad( pageInfo => {
       const entities = (pageInfo.entities||[]);
       if (entities.length > 0) {
+        // For the first loading.
+        // The application loads the records in two steps:
+        // The first -> load the records with the basic data (title only).
+        // The second -> load the records with all the data we retrieve from clarivate.
+        this.records = entities;
         this.loading = true;
         this.getAllPageRecords(entities);
       }
-      //this.loading = false;
     });  
   }
 
@@ -50,26 +55,27 @@ export class MainComponent implements OnInit, OnDestroy {
     const mmsIds = entities.map(entity => entity.id);
     this.almaService.getBibsDetailsByMmsId(mmsIds).pipe(
       mergeMap(records => {
-        // For the first loading.
-        // The application loads the records in two steps:
-        // The first -> load the records with the basic data (title only).
-        // The second -> load the records with all the data we retrieve from clarivate.
-        this.records = records;
-        return of(this.records);
-      }),mergeMap(records => {
         return this.clarivateServise.getSearchResultsFromClarivate(records);
       })
     ).subscribe({
       next: (response) => {
-        let newrecords = new Array<JCIRecord>();
-        response.jcrEntities.forEach(record => {
+        if(response.status === this.OkStatus) {
+          let newrecords = new Array<JCIRecord>();
+          response.jcrEntities?.forEach(record => {
           newrecords.push(this.generateJciRecord(record));
         });
             this.records = newrecords;
+        } else {
+          this.alert.error(response.errorMessage); 
+
+        }
+        
       },
       error: e => {
         this.loading = false;
         console.log(e.message);
+        this.alert.error(e.message); 
+
       },
       complete: () => {  
         this.loading = false;

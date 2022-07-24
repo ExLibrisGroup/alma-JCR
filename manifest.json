@@ -3,6 +3,7 @@
    "title": "Journal Citation Reports™",
    "subtitle": "Jurnal citation indicator cloud app",
    "author": "Ex Libris",
+   "description": "Journal Citation Reports™ (JCR) provides you with the transparent, publisher-neutral data and statistics you need to make confident decisions in today’s evolving scholarly publishing landscape, whether you’re submitting your first manuscript or managing a portfolio of thousands of publications.",
    "icon": {
       "type": "url",
       "value": "/assets/clarivate_logo.png"
@@ -16,6 +17,5 @@
          "https://*.alma.exlibrisgroup.com",
          "https://*.clarivate.com"
       ]
-   },
-   "description": ""
+   }
 }

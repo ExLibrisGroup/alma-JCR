@@ -20,7 +20,7 @@ export class MainComponent implements OnInit, OnDestroy {
   selectedEntity: Entity;
   apiResult: any;
   private baseUrl : string = "https://jcr.clarivate.com/jcr-jp/journal-profile?journal=";
-  private yearParam : string = " &year=";
+  private yearParam : string = "&year=";
   private OkStatus: string = 'OK';
 
 
@@ -61,8 +61,10 @@ export class MainComponent implements OnInit, OnDestroy {
       next: (response) => {
         if(response.status === this.OkStatus) {
           let newrecords = new Array<JCIRecord>();
-          response.jcrEntities?.forEach(record => {
-          newrecords.push(this.generateJciRecord(record));
+          response.jcrEntities?.forEach((record, index) => {
+          //Take the title from the entity. the description contains the full record title
+          //(the authority - if exists, for example)
+          newrecords.push(this.generateJciRecord(record, entities[index]?.description));
         });
             this.records = newrecords;
         } else {
@@ -83,10 +85,10 @@ export class MainComponent implements OnInit, OnDestroy {
     });
   }
 
-  generateJciRecord(record) : JCIRecord {
+  generateJciRecord(record, title) : JCIRecord {
     let jciRecord = new JCIRecord();
     jciRecord.ID = record.issn;
-    jciRecord.title = record.title;
+    jciRecord.title = title;
     if(!this.isEmpty(record.jcrInfo)) {
       jciRecord.available = true;
       jciRecord.year = record.jcrInfo.year;

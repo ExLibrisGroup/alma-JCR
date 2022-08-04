@@ -1,8 +1,10 @@
-<div class="title">
+<!-- <div class="title">
     <span>{{index}}. {{record.title?record.title : record.description}} {{IdentefierDisplay()}} </span>
-</div>
+</div> -->
+
+<h3 class="title">{{index}}. {{record.title?record.title : record.description}} {{IdentefierDisplay()}} </h3>
 <div *ngIf="record.available else notAvaliableRecord">
-    <mat-expansion-panel [expanded]="false">
+    <mat-expansion-panel class="mat-elevation-z0"[expanded]="false">
         <mat-expansion-panel-header>
             <mat-panel-title>
                 <mat-icon class="available-icon">check</mat-icon>

@@ -1,8 +1,5 @@
-<!-- <div class="title">
-    <span>{{index}}. {{record.title?record.title : record.description}} {{IdentefierDisplay()}} </span>
-</div> -->
 
-<h3 class="title">{{index}}. {{record.title?record.title : record.description}} {{IdentefierDisplay()}} </h3>
+<h3 class="title">{{index}}. {{record.title}} {{IdentefierDisplay()}} </h3>
 <div *ngIf="record.available else notAvaliableRecord">
     <mat-expansion-panel class="mat-elevation-z0"[expanded]="false">
         <mat-expansion-panel-header>

@@ -44,7 +44,13 @@ export class MainComponent implements OnInit, OnDestroy {
         // The application loads the records in two steps:
         // The first -> load the records with the basic data (title only).
         // The second -> load the records with all the data we retrieve from clarivate.
-        this.records = entities;
+        let jcrRecords = new Array<JCIRecord>();
+        entities.forEach(record =>{
+          let jciRecord = new JCIRecord();
+          jciRecord.title = record.description;
+          jcrRecords.push(jciRecord);
+        })
+        this.records = jcrRecords;
         this.loading = true;
         this.getAllPageRecords(entities);
       }
@@ -60,13 +66,13 @@ export class MainComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (response) => {
         if(response.status === this.OkStatus) {
-          let newrecords = new Array<JCIRecord>();
+          let jcrRecords = new Array<JCIRecord>();
           response.jcrEntities?.forEach((record, index) => {
           //Take the title from the entity. the description contains the full record title
           //(the authority - if exists, for example)
-          newrecords.push(this.generateJciRecord(record, entities[index]?.description));
+          jcrRecords.push(this.generateJciRecord(record, entities[index]?.description));
         });
-            this.records = newrecords;
+            this.records = jcrRecords;
         } else {
           this.alert.error(response.errorMessage); 
 

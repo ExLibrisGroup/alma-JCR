@@ -5,6 +5,8 @@ import { CloudAppRestService, CloudAppEventsService, Entity, AlertService } from
 import { AlmaApiService } from '../service/alma.api.service';
 import { ClarivateApiService } from '../service/clarivate.api.service';
 import { JCIRecord } from '../category-data-display/category-data-util';
+import { MatSlideToggleChange } from '@angular/material/slide-toggle';
+import { InCitesApiService } from '../service/InCites.api.service';
 
 
 @Component({
@@ -23,6 +25,12 @@ export class MainComponent implements OnInit, OnDestroy {
   private yearParam : string = "&year=";
   private OkStatus: string = 'OK';
 
+  public isSlideChecked: boolean = false;
+  public isIncitesEnabled : boolean = false;
+  //public showModal$ = new BehaviorSubject<boolean>(false);
+
+
+
 
   records = new Array<any>();
 
@@ -31,12 +39,22 @@ export class MainComponent implements OnInit, OnDestroy {
   constructor(
     private almaService: AlmaApiService,
     private clarivateServise : ClarivateApiService,
+    private inCitesApiService : InCitesApiService,
     private restService: CloudAppRestService,
     private eventsService: CloudAppEventsService,
-    private alert: AlertService 
+    private alert: AlertService
   ) { }
 
   ngOnInit() {
+    this.inCitesApiService.isIncitesFeatureEnable().subscribe({
+      next : (response) => {
+        //this.showModal$ = response.isFeatureEnable;
+        this.isIncitesEnabled = response.featureEnable;
+      },
+      error :(err) => {
+          console.log("Failed to get The FF from the server " + err);
+      },
+    });
     this.pageLoad$ = this.eventsService.onPageLoad( pageInfo => {
       const entities = (pageInfo.entities||[]);
       if (entities.length > 0) {
@@ -55,7 +73,14 @@ export class MainComponent implements OnInit, OnDestroy {
         this.getAllPageRecords(entities);
       }
     });  
+   
   }
+
+  isFeatureEnable() {
+    return this.isIncitesEnabled;
+  }
+
+
 
   getAllPageRecords(entities: any[]) {
     const mmsIds = entities.map(entity => entity.id);
@@ -129,5 +154,25 @@ export class MainComponent implements OnInit, OnDestroy {
     }
     return this.baseUrl + jurnalType + this.yearParam + year;
 
+  }
+
+  toggleChanges($event: MatSlideToggleChange) {
+    this.inCitesApiService.connectToInCites($event.checked).subscribe({
+      next: (response) => {
+        if(response.status === this.OkStatus) {
+          console.log("success");
+        } else {
+          this.alert.error(response.errorMessage); 
+        } 
+      },
+      error: e => {
+        this.loading = false;
+        console.log(e.message);
+        this.alert.error(e.message); 
+      },
+      complete: () => {  
+        this.loading = false;
+      }
+    });
   }
 }

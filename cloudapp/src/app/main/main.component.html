@@ -1,3 +1,10 @@
+<div *ngIf="isFeatureEnable()" >
+  <mat-slide-toggle translate [checked]="isSlideChecked" (change)="toggleChanges($event)">Share data with Web of Science</mat-slide-toggle>
+  <mat-icon translate matTooltip="By choosing to turn this feature on, you are giving your consent to share your electronic holdings with Web of Science to have an Alma Report in InCites" aria-hidden="false" aria-label="Example home icon" fontIcon=in class="uxf-info-circle"></mat-icon>
+  <br>
+  <mat-divider></mat-divider>
+  <br>
+</div>
 <div *ngIf="records.length>0 else nobibs">
   <p translate>JCR metrics available for the displayed records in Web of Science:</p>
   <mat-list>

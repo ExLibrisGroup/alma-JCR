@@ -27,10 +27,6 @@ export class MainComponent implements OnInit, OnDestroy {
 
   public isSlideChecked: boolean = false;
   public isIncitesEnabled : boolean = false;
-  //public showModal$ = new BehaviorSubject<boolean>(false);
-
-
-
 
   records = new Array<any>();
 
@@ -48,8 +44,10 @@ export class MainComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.inCitesApiService.isIncitesFeatureEnable().subscribe({
       next : (response) => {
-        //this.showModal$ = response.isFeatureEnable;
-        this.isIncitesEnabled = response.featureEnable;
+        if(!this.isEmpty(response)) {
+          this.isIncitesEnabled = response.featureEnable;
+          this.isSlideChecked = response.optin;
+        }
       },
       error :(err) => {
           console.log("Failed to get The FF from the server " + err);
@@ -79,8 +77,6 @@ export class MainComponent implements OnInit, OnDestroy {
   isFeatureEnable() {
     return this.isIncitesEnabled;
   }
-
-
 
   getAllPageRecords(entities: any[]) {
     const mmsIds = entities.map(entity => entity.id);
@@ -163,6 +159,7 @@ export class MainComponent implements OnInit, OnDestroy {
           console.log("success");
         } else {
           this.alert.error(response.errorMessage); 
+          $event.checked = !$event.checked;
         } 
       },
       error: e => {

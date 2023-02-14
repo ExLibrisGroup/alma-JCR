@@ -59,11 +59,11 @@ export class InCitesApiService extends BaseService {
 
     private getQueryParams() :string{
         let urlParams = "";
-        urlParams = urlParams + QueryParams.Option + "=" + this._toConnect;
+        urlParams = urlParams + QueryParams.Optin + "=" + this._toConnect;
         return urlParams;
     }
 }
 
 export enum QueryParams {
-    Option = "option"
+    Optin = "optin"
   }

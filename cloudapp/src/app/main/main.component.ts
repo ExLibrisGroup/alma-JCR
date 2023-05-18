@@ -82,6 +82,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   getAllPageRecords(entities: any[]) {
+    this.alert.clear();
     //Get the scope - it's needed for the query param
     const queryParam = this.getQueryParamByScope(entities[0].link);
     const mmsIds = entities.map(entity => entity.id);

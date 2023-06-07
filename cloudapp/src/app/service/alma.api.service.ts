@@ -8,16 +8,18 @@ import { forkJoin } from 'rxjs/internal/observable/forkJoin';
 })
 export class AlmaApiService {
 
-  private baseUrl : string = "/almaws/v1/bibs?";
-
-
 
   constructor(
     private restService: CloudAppRestService,
   ) {  }
 
-  getBibsDetailsByMmsId (mmsIds, scope) {
-    let url : string = this.baseUrl + scope + "=";
-    return this.restService.call(url + mmsIds)
+  getBibsDetailsByMmsId (mmsIds) {
+     // forkJoin run the function inside on each entity seperatly
+    return forkJoin(mmsIds.map(mmsId => this.getRecord(mmsId)));
+  }
+
+  getRecord(mmsId: string) {
+    let url : string = "/almaws/v1/bibs/";
+    return this.restService.call(url + mmsId)
   }
 }

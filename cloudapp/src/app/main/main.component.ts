@@ -24,9 +24,6 @@ export class MainComponent implements OnInit, OnDestroy {
   private baseUrl : string = "https://jcr.clarivate.com/jcr-jp/journal-profile?journal=";
   private yearParam : string = "&year=";
   private OkStatus: string = 'OK';
-  private izRecordsParam : string = 'mms_id';
-  private nzRecordsParam : string = 'proxy_nz_mms_id';
-  private czRecordsParam : string = 'proxy_cz_mms_id';
 
   public isSlideChecked: boolean = false;
   public isIncitesEnabled : boolean = false;
@@ -83,13 +80,10 @@ export class MainComponent implements OnInit, OnDestroy {
 
   getAllPageRecords(entities: any[]) {
     this.alert.clear();
-    //Get the scope - it's needed for the query param
-    const queryParam = this.getQueryParamByScope(entities[0].link);
     const mmsIds = entities.map(entity => entity.id);
-  
-    this.almaService.getBibsDetailsByMmsId(mmsIds, queryParam).pipe(
+    this.almaService.getBibsDetailsByMmsId(mmsIds).pipe(
       mergeMap(records => {
-        return this.clarivateServise.getSearchResultsFromClarivate(records.bib);
+        return this.clarivateServise.getSearchResultsFromClarivate(records);
       })
     ).subscribe({
       next: (response) => {
@@ -104,7 +98,8 @@ export class MainComponent implements OnInit, OnDestroy {
         } else {
           this.alert.error(response.errorMessage); 
 
-        } 
+        }
+        
       },
       error: e => {
         this.loading = false;
@@ -178,20 +173,4 @@ export class MainComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  getQueryParamByScope(link : string) {
-    if(link.toUpperCase().includes('CZ')) {
-      return this.czRecordsParam;
-    }
-    else if(link.toUpperCase().includes('NZ')) {
-      return this.nzRecordsParam;
-    }
-    return this.izRecordsParam;
-  }
-}
-
-export enum Scope {
-  IZ = "IZ",
-  NZ = "NZ",
-  CZ = "CZ",
 }

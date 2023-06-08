@@ -11,7 +11,6 @@ import { BaseService } from './base.service';
 export class InCitesApiService extends BaseService {
     private _toConnect : boolean;
     private _isQueryParamsNeeded : boolean = false;
-    private _authorization : any;
 
     constructor(
         protected eventsService: CloudAppEventsService,
@@ -33,7 +32,6 @@ export class InCitesApiService extends BaseService {
             }),
             mergeMap(authToken => {
                 let headers = this.setAuthHeader(authToken);
-                this._authorization = headers.Authorization;
                 return this.http.post<any>(fullUrl, { headers })
             })
         );
@@ -50,8 +48,7 @@ export class InCitesApiService extends BaseService {
             }),
             mergeMap(authToken => {
                 let headers = this.setAuthHeader(authToken);
-                this._authorization = headers.Authorization;
-                return this.http.get<any>(fullUrl, {  })
+                return this.http.get<any>(fullUrl, { headers })
             })
         );
     }
@@ -59,21 +56,19 @@ export class InCitesApiService extends BaseService {
     setBaseUrl(initData: InitData) : string {
         let baseUrl = super.setBaseUrl(initData);
         baseUrl = baseUrl + "inCites?";
-        if (this._isQueryParamsNeeded) {
+        if(this._isQueryParamsNeeded) {
             baseUrl = baseUrl + this.getQueryParams();
-
         }
         return baseUrl;
       }
 
     private getQueryParams() :string{
         let urlParams = "";
-        urlParams = urlParams + QueryParams.Optin + "=" + this._toConnect +"&" + QueryParams.Jwt + "=" + this._authorization;
+        urlParams = urlParams + QueryParams.Optin + "=" + this._toConnect;
         return urlParams;
     }
 }
 
 export enum QueryParams {
-    Optin = "optin",
-    Jwt = "jwt"
+    Optin = "optin"
   }

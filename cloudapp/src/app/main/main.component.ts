@@ -9,6 +9,7 @@ import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { InCitesApiService } from '../service/InCites.api.service';
 
 
+
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
@@ -29,7 +30,6 @@ export class MainComponent implements OnInit, OnDestroy {
   private czRecordsParam : string = 'proxy_cz_mms_id';
 
   public isSlideChecked: boolean = false;
-  public isIncitesEnabled : boolean = false;
 
   records = new Array<any>();
 
@@ -45,10 +45,9 @@ export class MainComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.inCitesApiService.isIncitesFeatureEnable().subscribe({
+    this.inCitesApiService.getIncitesOptin().subscribe({
       next : (response) => {
         if(!this.isEmpty(response)) {
-          this.isIncitesEnabled = response.featureEnable;
           this.isSlideChecked = response.optin;
         }
       },
@@ -75,10 +74,6 @@ export class MainComponent implements OnInit, OnDestroy {
       }
     });  
    
-  }
-
-  isFeatureEnable() {
-    return this.isIncitesEnabled;
   }
 
   getAllPageRecords(entities: any[]) {

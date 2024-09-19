@@ -37,7 +37,7 @@ export class InCitesApiService extends BaseService {
         );
     }
 
-    isIncitesFeatureEnable() {
+    getIncitesOptin() {
         let fullUrl: string;
         return this.getInitData().pipe(
             mergeMap(initData => {

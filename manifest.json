@@ -3,7 +3,7 @@
    "title": "Journal Citation Reports™",
    "subtitle": "Journal citation indicator cloud app",
    "author": "Ex Libris",
-   "description": "Journal Citation Reports™ (JCR) provides you with the transparent, publisher-neutral data and statistics you need to make confident decisions in today’s evolving scholarly publishing landscape, whether you’re submitting your first manuscript or managing a portfolio of thousands of publications.",
+   "description": "By enabling this feature, you consent to share your electronic holdings with Web of Science in order to generate an Alma report in InCites. We will evaluate the option to create the report.",
    "icon": {
       "type": "url",
       "value": "/assets/clarivate_logo.png"

@@ -15,6 +15,7 @@
       "connectSrc": [
          "http://*.corp.exlibrisgroup.com:1801",
          "https://*.alma.exlibrisgroup.com",
+         "https://*.alma.exlibrisgroup.com.cn",
          "https://*.clarivate.com"
       ]
    }
